@@ -1,10 +1,10 @@
 import 'dart:html';
 import 'dart:js' as js;
 
-import "package:angular/src/core/di.dart" show Injectable, Inject, OpaqueToken;
+import 'package:angular/src/core/di.dart' show Injectable, Inject, OpaqueToken;
 import 'package:angular/src/facade/exceptions.dart' show BaseException;
 
-import './hammer_common.dart';
+import 'hammer_common.dart';
 
 const OpaqueToken HAMMER_GESTURE_CONFIG =
     const OpaqueToken("HammerGestureConfig");

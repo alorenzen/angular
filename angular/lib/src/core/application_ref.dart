@@ -1,11 +1,10 @@
 import 'dart:async';
 import 'dart:html';
 
-import 'package:angular/platform/common_dom.dart';
 import 'package:angular/src/core/change_detection/constants.dart';
 import 'package:angular/src/core/linker/app_view.dart'
-    show lastGuardedView, caughtException, caughtStack;
-import 'package:angular/src/core/linker/view_ref.dart';
+    show lastGuardedView, caughtException, caughtStack, ViewRefImpl;
+import 'package:angular/src/core/render/api.dart';
 import 'package:angular/src/facade/exceptions.dart'
     show BaseException, ExceptionHandler;
 import 'package:angular/src/facade/lang.dart' show assertionsEnabled, isDartVM;

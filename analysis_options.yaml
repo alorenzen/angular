@@ -7,7 +7,7 @@ analyzer:
    dead_code: error
    ### Useful to uncomment during development to remove the noise of the many
    ### deprecated APIs.
-   # deprecated_member_use: ignore
+   deprecated_member_use: ignore
 linter:
   rules:
     #- always_declare_return_types

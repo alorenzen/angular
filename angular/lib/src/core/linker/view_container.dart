@@ -6,7 +6,6 @@ import 'component_factory.dart' show ComponentFactory, ComponentRef;
 import 'element_ref.dart';
 import 'template_ref.dart';
 import 'view_container_ref.dart';
-import 'view_ref.dart' show EmbeddedViewRef, ViewRef, ViewRefImpl;
 import 'view_type.dart';
 
 /// A ViewContainer is created for elements that contain

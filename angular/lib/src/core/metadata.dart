@@ -1,10 +1,9 @@
 import 'package:meta/meta.dart';
 
 import 'change_detection/change_detection.dart';
-import 'metadata/di.dart';
+import 'di/decorators.dart';
 import 'metadata/view.dart';
 
-export 'metadata/di.dart';
 export 'metadata/lifecycle_hooks.dart'
     show
         AfterContentInit,

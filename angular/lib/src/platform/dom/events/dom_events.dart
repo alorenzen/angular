@@ -1,8 +1,8 @@
 import 'dart:html' show Element, Event;
 
 import 'package:meta/meta.dart';
-import 'package:angular/di.dart' show Injectable;
 
+import '../../../core/di/decorators.dart';
 import 'event_manager.dart' show EventManagerPlugin;
 
 @Injectable()

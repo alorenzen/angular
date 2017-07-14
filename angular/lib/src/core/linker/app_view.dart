@@ -2,8 +2,6 @@ import 'dart:async';
 import 'dart:html';
 import 'dart:js_util' as js_util;
 
-import 'package:func/func.dart';
-import 'package:meta/meta.dart';
 import 'package:angular/src/core/change_detection/change_detection.dart'
     show ChangeDetectorRef, ChangeDetectionStrategy, ChangeDetectorState;
 import 'package:angular/src/core/di.dart' show Injector;
@@ -11,6 +9,8 @@ import 'package:angular/src/core/di/injector.dart' show THROW_IF_NOT_FOUND;
 import 'package:angular/src/core/metadata/view.dart' show ViewEncapsulation;
 import 'package:angular/src/core/render/api.dart';
 import 'package:angular/src/platform/dom/shared_styles_host.dart';
+import 'package:func/func.dart';
+import 'package:meta/meta.dart';
 
 import '../zone/ng_zone.dart';
 import 'app_view_utils.dart';
@@ -19,10 +19,11 @@ import 'element_injector.dart' show ElementInjector;
 import 'exceptions.dart' show ViewDestroyedException;
 import 'template_ref.dart';
 import 'view_container.dart';
-import 'view_ref.dart' show ViewRefImpl;
 import 'view_type.dart' show ViewType;
 
 export 'package:angular/src/core/change_detection/component_state.dart';
+
+part 'view_ref.dart';
 
 /// **INTERNAL ONLY**: Will be made private once the reflective compiler is out.
 ///

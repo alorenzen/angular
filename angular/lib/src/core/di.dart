@@ -1,9 +1,9 @@
 /// A dependency Injection container.
-export "di/decorators.dart";
-export "di/injector.dart" show Injector;
-export "di/opaque_token.dart" show OpaqueToken;
-export "di/provider.dart" show Provider, provide, noValueProvided;
-export "di/reflective_exceptions.dart"
+export 'di/decorators.dart';
+export 'di/injector.dart' show Injector;
+export 'di/opaque_token.dart' show OpaqueToken;
+export 'di/provider.dart' show Provider, provide, noValueProvided;
+export 'di/reflective_exceptions.dart'
     show
         NoProviderError,
         AbstractProviderError,
@@ -12,9 +12,9 @@ export "di/reflective_exceptions.dart"
         InvalidProviderError,
         NoAnnotationError,
         OutOfBoundsError;
-export "di/reflective_injector.dart" show ReflectiveInjector;
-export "di/reflective_key.dart" show ReflectiveKey;
-export "di/reflective_provider.dart"
+export 'di/reflective_injector.dart' show ReflectiveInjector;
+export 'di/reflective_key.dart' show ReflectiveKey;
+export 'di/reflective_provider.dart'
     show
         ResolvedReflectiveBinding,
         ResolvedReflectiveFactory,

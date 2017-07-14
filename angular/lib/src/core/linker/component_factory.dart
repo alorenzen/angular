@@ -7,7 +7,6 @@ import '../change_detection/change_detection.dart' show ChangeDetectorRef;
 import 'app_view.dart';
 import 'app_view_utils.dart' show OnDestroyCallback;
 import 'element_ref.dart' show ElementRef;
-import 'view_ref.dart' show ViewRef;
 
 /// Represents an instance of a Component created via a [ComponentFactory].
 ///

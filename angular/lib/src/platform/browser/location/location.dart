@@ -1,7 +1,7 @@
-import "package:angular/di.dart" show Injectable;
-import "package:angular/src/facade/async.dart" show EventEmitter;
+import 'package:angular/src/core/di/decorators.dart' show Injectable;
+import 'package:angular/src/facade/async.dart' show EventEmitter;
 
-import "location_strategy.dart" show LocationStrategy;
+import 'location_strategy.dart' show LocationStrategy;
 
 /// `Location` is a service that applications can use to interact with a browser's URL.
 /// Depending on which [LocationStrategy] is used, `Location` will either persist

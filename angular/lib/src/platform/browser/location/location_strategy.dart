@@ -1,6 +1,6 @@
 import 'dart:html';
 
-import "package:angular/di.dart" show OpaqueToken;
+import 'package:angular/src/core/di/opaque_token.dart' show OpaqueToken;
 
 /// `LocationStrategy` is responsible for representing and reading route state
 /// from the browser's URL. Angular provides two strategies:

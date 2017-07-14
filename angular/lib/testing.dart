@@ -7,7 +7,6 @@ library angular.testing;
 import 'package:meta/meta.dart';
 
 import 'src/core/change_detection.dart';
-import 'src/core/linker/view_ref.dart';
 import 'src/debug/debug_app_view.dart';
 
 export 'src/compiler/directive_resolver_mock.dart' show MockDirectiveResolver;

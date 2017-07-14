@@ -1,6 +1,6 @@
-import "package:angular/platform/common.dart" show LocationStrategy;
-import "package:angular/src/core/di.dart" show Injectable;
-import "package:angular/src/facade/async.dart" show EventEmitter;
+import 'package:angular/src/platform/location.dart' show LocationStrategy;
+import 'package:angular/src/core/di.dart' show Injectable;
+import 'package:angular/src/facade/async.dart' show EventEmitter;
 
 /// A mock implementation of [LocationStrategy] that allows tests to fire
 /// simulated location events.

@@ -1,4 +1,4 @@
-import "event_manager.dart" show EventManagerPlugin;
+import 'event_manager.dart' show EventManagerPlugin;
 
 var _eventNames = {
   // pan

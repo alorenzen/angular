@@ -8,7 +8,7 @@ import 'dart:html';
 import 'package:angular_test/angular_test.dart';
 import 'package:test/test.dart';
 import 'package:angular/angular.dart';
-import 'package:angular/src/core/linker/view_ref.dart';
+import 'package:angular/src/core/linker/app_view.dart';
 import 'package:angular/src/debug/debug_app_view.dart';
 
 import 'deferred_view.dart';

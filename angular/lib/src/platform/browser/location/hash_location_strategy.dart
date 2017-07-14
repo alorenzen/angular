@@ -1,10 +1,10 @@
 import 'dart:html' as html;
 
-import "package:angular/di.dart" show Injectable, Inject, Optional;
+import 'package:angular/src/core/di/decorators.dart' show Injectable, Inject, Optional;
 
-import "location.dart" show Location;
-import "location_strategy.dart" show LocationStrategy, APP_BASE_HREF;
-import "platform_location.dart" show PlatformLocation;
+import 'location.dart' show Location;
+import 'location_strategy.dart' show LocationStrategy, APP_BASE_HREF;
+import 'platform_location.dart' show PlatformLocation;
 
 /// `HashLocationStrategy` is a [LocationStrategy] used to configure the
 /// [PlatformLocation] service to represent its state in the

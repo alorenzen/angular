@@ -3,8 +3,8 @@ import 'dart:collection';
 import 'platform_reflection_capabilities.dart';
 import 'types.dart';
 
-export "platform_reflection_capabilities.dart";
-export "types.dart";
+export 'platform_reflection_capabilities.dart';
+export 'types.dart';
 
 /// Reflective information about a symbol, including annotations, interfaces,
 /// and other metadata.

@@ -1,15 +1,12 @@
-import 'package:angular/di.dart' show Injectable, Inject;
-import 'package:angular/src/core/application_tokens.dart' show APP_ID;
-import 'package:angular/src/core/change_detection/change_detection.dart'
+import '../../facade/lang.dart' show looseIdentical;
+import '../../platform/dom/events/event_manager.dart';
+import '../application_tokens.dart' show APP_ID;
+import '../change_detection/change_detection.dart'
     show devModeEqual;
-import 'package:angular/src/core/metadata/view.dart' show ViewEncapsulation;
-import 'package:angular/src/core/render/api.dart' show RenderComponentType;
-import 'package:angular/src/core/security.dart' show SafeValue;
-import 'package:angular/src/core/security.dart';
-import 'package:angular/src/facade/lang.dart' show looseIdentical;
-import 'package:angular/src/platform/dom/events/event_manager.dart'
-    show EventManager;
-
+import '../di.dart' show Injectable, Inject;
+import '../metadata/view.dart' show ViewEncapsulation;
+import '../render/api.dart' show RenderComponentType;
+import '../security.dart' show SafeValue, SanitizationService;
 import 'exceptions.dart' show ExpressionChangedAfterItHasBeenCheckedException;
 
 /// Function called when a view is destroyed.

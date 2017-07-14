@@ -1,5 +1,6 @@
 // Public API for compiler
 
+export "linker/app_view.dart" show EmbeddedViewRef, ViewRef;
 export "linker/component_factory.dart" show ComponentRef, ComponentFactory;
 export "linker/component_resolver.dart" show ComponentResolver;
 export "linker/dynamic_component_loader.dart" show DynamicComponentLoader;
@@ -9,4 +10,3 @@ export "linker/exceptions.dart"
 export "linker/query_list.dart" show QueryList;
 export "linker/template_ref.dart" show TemplateRef;
 export "linker/view_container_ref.dart" show ViewContainerRef;
-export "linker/view_ref.dart" show EmbeddedViewRef, ViewRef;

@@ -1,7 +1,6 @@
 import 'app_view.dart';
 import 'element_ref.dart';
 import 'view_container.dart';
-import 'view_ref.dart' show EmbeddedViewRef;
 
 /// Represents an Embedded Template that can be used to instantiate Embedded
 /// Views.

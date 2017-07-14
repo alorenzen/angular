@@ -19,7 +19,6 @@ const publicLibraries = const <String, List<String>>{
   "experimental.dart": null,
   "platform/browser_static.dart": null,
   "platform/common.dart": NG_PLATFORM_COMMON,
-  "platform/common_dom.dart": null,
   "platform/testing/browser.dart": NG_PLATFORM_BROWSER_TESTING,
   "platform/testing/browser_static.dart": null,
   "router.dart": null,

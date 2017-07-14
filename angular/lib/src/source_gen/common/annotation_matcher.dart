@@ -1,8 +1,9 @@
 import 'package:analyzer/dart/element/element.dart';
 import 'package:analyzer/src/dart/element/element.dart';
+import 'package:angular/src/core/di/decorators.dart';
+import 'package:angular/src/core/metadata.dart';
 import 'package:logging/logging.dart';
 import 'package:source_gen/source_gen.dart';
-import 'package:angular/src/core/metadata.dart';
 
 // See internal bug b/35319372 for details.
 

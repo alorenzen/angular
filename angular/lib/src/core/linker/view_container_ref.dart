@@ -1,9 +1,9 @@
 import 'package:angular/src/core/di/injector.dart' show Injector;
 
+import 'app_view.dart' show EmbeddedViewRef, ViewRef;
 import 'component_factory.dart' show ComponentFactory, ComponentRef;
 import 'element_ref.dart';
 import 'template_ref.dart';
-import 'view_ref.dart' show EmbeddedViewRef, ViewRef;
 
 /// Represents a container where one or more Views can be attached.
 ///

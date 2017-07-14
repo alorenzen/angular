@@ -8,9 +8,9 @@ import "package:angular/core.dart"
         Injector,
         ElementRef,
         ChangeDetectorRef;
-import "package:angular/di.dart" show Injectable;
-import 'package:angular/platform/common_dom.dart';
+import 'package:angular/src/core/di/decorators.dart';
 import "package:angular/src/core/linker/app_view_utils.dart";
+import 'package:angular/src/core/render/api.dart';
 import "package:angular/src/debug/debug_node.dart"
     show DebugElement, getDebugNode;
 import "package:angular/src/platform/dom/dom_tokens.dart" show DOCUMENT;

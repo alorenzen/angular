@@ -1,8 +1,8 @@
-import "dart:html";
+import 'dart:html';
 
-import "package:angular/src/core/di.dart" show Injectable;
+import 'package:angular/src/core/di.dart' show Injectable;
 
-import "event_manager.dart" show EventManagerPlugin;
+import 'event_manager.dart' show EventManagerPlugin;
 
 var modifierKeys = ["alt", "control", "meta", "shift"];
 Map<String, dynamic /* (event: KeyboardEvent) => boolean */ >

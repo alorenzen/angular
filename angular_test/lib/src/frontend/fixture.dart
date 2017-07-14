@@ -8,7 +8,6 @@ import 'dart:html';
 import 'package:func/func.dart';
 import 'package:pageloader/objects.dart';
 import 'package:angular/angular.dart';
-import 'package:angular/src/core/linker/view_ref.dart';
 import 'package:angular/src/debug/debug_app_view.dart';
 import 'package:angular/src/debug/debug_node.dart';
 
