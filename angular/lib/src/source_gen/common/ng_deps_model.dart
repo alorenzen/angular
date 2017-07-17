@@ -1,5 +1,4 @@
 import 'package:code_builder/code_builder.dart';
-import 'package:code_builder/dart/core.dart';
 import 'package:quiver/iterables.dart';
 import 'package:angular/src/compiler/compiler_utils.dart';
 import 'package:angular/src/transform/common/names.dart';
@@ -44,8 +43,8 @@ class NgDepsModel {
 
     // Write code to prevent reentry.
     if (hasInitializationCode) {
-      setUpMethod.addStatement(ifThen(reference(_visited), [returnVoid]));
-      setUpMethod.addStatement(literal(true).asAssign(reference(_visited)));
+      setUpMethod.addStatement(ifThen(new Reference(_visited), [returnVoid]));
+      setUpMethod.addStatement(literal(true).asAssign(new Reference(_visited)));
     }
 
     for (var reflectable in reflectables) {

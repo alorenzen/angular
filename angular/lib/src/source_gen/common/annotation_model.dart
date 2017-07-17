@@ -8,18 +8,18 @@ import 'references.dart';
 /// An annotation on a reflection type.
 class AnnotationModel {
   final String name;
-  final ReferenceBuilder type;
+  final Reference type;
   final bool _isConstObject;
-  final Iterable<ReferenceBuilder> _parameters;
-  final Iterable<NamedParameter> _namedParameters;
+  final Iterable<Reference> _parameters;
+  final Iterable<Parameter> _namedParameters;
 
   AnnotationModel(
       {this.name,
-      ReferenceBuilder type,
+      Reference type,
       bool isConstObject: false,
-      Iterable<ReferenceBuilder> parameters: const [],
-      Iterable<NamedParameter> namedParameters: const []})
-      : this.type = type ?? reference(name),
+      Iterable<Reference> parameters: const [],
+      Iterable<Parameter> namedParameters: const []})
+      : this.type = type ?? new Reference(name),
         _isConstObject = isConstObject,
         _parameters = parameters,
         _namedParameters = namedParameters;
@@ -31,17 +31,16 @@ class AnnotationModel {
   ) {
     var element = annotation.element;
     if (element is ConstructorElement) {
-      var parameters = <ReferenceBuilder>[];
-      var namedParameters = <NamedParameter>[];
+      var parameters = <Reference>[];
+      var namedParameters = <Parameter>[];
       for (var arg in annotation.annotationAst.arguments.arguments) {
         if (arg is NamedExpression) {
           namedParameters.add(
-            new NamedParameter(
-              arg.name.label.name,
-              new ExpressionBuilder.raw(
-                (_) => arg.expression.toSource(),
-              ),
-            ),
+            new Parameter((b) => b
+              ..named = true
+              ..name = arg.name.label.name
+              ..defaultTo =
+                  new Code((b) => b..code = arg.expression.toSource())),
           );
         } else {
           parameters.add(
@@ -62,18 +61,17 @@ class AnnotationModel {
     }
   }
 
-  ExpressionBuilder get asExpression => _isConstObject
-      ? type
-      : type.constInstance(_parameters, namedArguments: _namedParametersAsMap);
+  Code get asExpression =>
+      new Code((b) => b..code = _asCode ..specs.addAll({'TYPE': () => type}));
+
+  String get _asCode =>
+      _isConstObject
+      ? '{{TYPE}}'
+      : 'const {{TYPE}}${(_parameters, namedArguments: _namedParametersAsMap)}';
+
+
 
   Map<String, ExpressionBuilder> get _namedParametersAsMap =>
       new Map.fromIterable(_namedParameters,
           key: (param) => param.name, value: (param) => param.value);
-}
-
-class NamedParameter {
-  final String name;
-  final ReferenceBuilder value;
-
-  NamedParameter(this.name, this.value);
 }

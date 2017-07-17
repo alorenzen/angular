@@ -4,7 +4,7 @@ import 'package:analyzer/analyzer.dart' hide Directive;
 import 'package:analyzer/dart/element/element.dart';
 import 'package:analyzer/dart/element/visitor.dart';
 import 'package:build/build.dart';
-import 'package:code_builder/code_builder.dart';
+import 'package:code_builder/code_builder.dart' hide Directive;
 import 'package:meta/meta.dart';
 import 'package:angular/src/compiler/compile_metadata.dart';
 import 'package:angular/src/core/metadata.dart';
@@ -14,7 +14,6 @@ import 'package:angular/src/source_gen/common/annotation_model.dart';
 import 'package:angular/src/source_gen/common/namespace_model.dart';
 import 'package:angular/src/source_gen/common/ng_deps_model.dart';
 import 'package:angular/src/source_gen/common/parameter_model.dart';
-import 'package:angular/src/source_gen/common/references.dart';
 import 'package:angular/src/source_gen/common/reflection_info_model.dart';
 import 'package:angular/src/transform/common/names.dart';
 
@@ -131,11 +130,10 @@ class ReflectableVisitor extends RecursiveElementVisitor {
     _reflectables.add(new ReflectionInfoModel(
         isFunction: false,
         // TODO(alorenzen): Add import from source file, for proper scoping.
-        type: reference(compileType.name),
+        type: new Reference(compileType.name),
         ctorName: constructor.name,
         parameters: _parameters(constructor),
-        annotations: _annotationsFor(element),
-        interfaces: _interfaces(element)));
+        annotations: _annotationsFor(element)));
   }
 
   @override
@@ -144,7 +142,7 @@ class ReflectableVisitor extends RecursiveElementVisitor {
       _reflectables.add(new ReflectionInfoModel(
           isFunction: true,
           // TODO(alorenzen): Add import from source file, for proper scoping.
-          type: reference(element.name),
+          type: new Reference(element.name),
           parameters: _parameters(element),
           annotations: _annotations(element.metadata, element)));
     }
@@ -160,11 +158,6 @@ class ReflectableVisitor extends RecursiveElementVisitor {
     }
     return parameters;
   }
-
-  // TODO(alorenzen): Verify that this works for interfaces of superclasses.
-  List<ReferenceBuilder> _interfaces(ClassElement element) => element.interfaces
-      .map((interface) => toBuilder(interface, element.library.imports))
-      .toList();
 
   /// Finds all annotations for the [element] that need to be registered with
   /// the reflector.

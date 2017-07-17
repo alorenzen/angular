@@ -3,10 +3,12 @@ import 'package:analyzer/dart/element/type.dart';
 import 'package:analyzer/src/dart/resolver/scope.dart';
 import 'package:code_builder/code_builder.dart';
 
-ReferenceBuilder toBuilder(DartType type, List<ImportElement> imports,
+Reference toBuilder(DartType type, List<ImportElement> imports,
         {bool includeGenerics: true}) =>
-    reference(type.name, _importFrom(type, imports))
-        .toTyped(includeGenerics ? _coerceTypeArgs(type, imports) : const []);
+    new Reference(type.name, _importFrom(type, imports)).toType().rebuild((b) =>
+        b
+          ..types.replace(
+              includeGenerics ? _coerceTypeArgs(type, imports) : const []));
 
 String _importFrom(DartType dartType, List<ImportElement> imports) {
   final NamespaceBuilder builder = new NamespaceBuilder();
@@ -22,7 +24,7 @@ String _importFrom(DartType dartType, List<ImportElement> imports) {
   return null;
 }
 
-Iterable<TypeBuilder> _coerceTypeArgs(
+Iterable<Reference> _coerceTypeArgs(
     DartType type, List<ImportElement> imports) {
   if (type is! ParameterizedType) return const [];
   var typeArgs = (type as ParameterizedType).typeArguments;

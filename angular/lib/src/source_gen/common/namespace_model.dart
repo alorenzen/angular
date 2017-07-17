@@ -27,12 +27,12 @@ class ImportModel extends _NamespaceModel {
       showCombinators: _showCombinators(element.combinators),
       hideCombinators: _hideCombinators(element.combinators));
 
-  ImportBuilder get asBuilder =>
-      new ImportBuilder(uri, deferred: isDeferred, prefix: prefix)
+  Directive get asBuilder =>
+      new Directive.import(uri, deferred: isDeferred, as: prefix)
         ..showAll(showCombinators)
         ..hideAll(hideCombinators);
 
-  String get asStatement => prettyToSource(asBuilder.buildAst());
+  String get asStatement => asBuilder.accept(new DartEmitter()).toString();
 }
 
 /// A simple Export reference.
@@ -58,7 +58,7 @@ class ExportModel extends _NamespaceModel {
       showCombinators: showCombinators,
       hideCombinators: hideCombinators);
 
-  ExportBuilder get asBuilder => new ExportBuilder(uri)
+  Directive get asBuilder => new Directive.export(uri)
     ..showAll(showCombinators)
     ..hideAll(hideCombinators);
 }

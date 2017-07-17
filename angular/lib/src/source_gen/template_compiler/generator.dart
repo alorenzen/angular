@@ -46,8 +46,10 @@ class TemplateGenerator extends Generator {
   }
 }
 
-final String _emptyNgDepsContents = prettyToSource(
-    new MethodBuilder.returnVoid('initReflector').buildTopLevelAst());
+final String _emptyNgDepsContents =
+    new Method.returnsVoid((b) => b..name = 'initReflector')
+        .accept(new DartEmitter())
+        .toString();
 
 /// Generates an empty `.ng_placeholder` file which is used as a signal to later
 /// builders which files will eventually get `.template.dart` generated.

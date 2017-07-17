@@ -1,7 +1,6 @@
-import 'package:analyzer/dart/ast/ast.dart';
+import 'package:analyzer/dart/ast/ast.dart' hide Directive;
 import 'package:analyzer/dart/ast/standard_ast_factory.dart';
 import 'package:code_builder/code_builder.dart';
-import 'package:code_builder/src/tokens.dart';
 import 'package:quiver/strings.dart' as strings;
 import 'package:angular/src/source_gen/common/namespace_model.dart';
 import 'package:angular/src/source_gen/common/ng_deps_model.dart';
@@ -46,16 +45,16 @@ String buildGeneratedCode(
 
   buffer.write(templateCode);
 
-  var library = new LibraryBuilder.scope(scope: scope);
+  var library = File.toBuilder();
 
   if (strings.isNotEmpty(templateCode) && model.reflectables.isNotEmpty) {
     library
-        .addMember(model.localMetadataMap as AstBuilder<CompilationUnitMember>);
+        .body.add(model.localMetadataMap as AstBuilder<CompilationUnitMember>);
   }
 
-  setupMethodMembers.forEach(library.addMember);
+  library.body.addAll(setupMethodMembers);
 
-  buffer.write(prettyToSource(library.buildAst()));
+  buffer.write(library.accept(new DartEmitter(scope)));
   return buffer.toString();
 }
 
@@ -68,11 +67,11 @@ void _writeImportExports(
     Map<String, String> deferredModules) {
   // We need to import & export (see below) the source file.
   scope.addPrefixImport(sourceFile, '');
-  List<ImportBuilder> imports = [new ImportModel(uri: sourceFile).asBuilder];
+  List<Directive> directives = [new ImportModel(uri: sourceFile).asBuilder];
 
   if (model.reflectables.isNotEmpty) {
     scope.addPrefixImport(REFLECTOR_IMPORT, REFLECTOR_PREFIX);
-    imports.add(new ImportModel(uri: REFLECTOR_IMPORT, prefix: REFLECTOR_PREFIX)
+    directives.add(new ImportModel(uri: REFLECTOR_IMPORT, prefix: REFLECTOR_PREFIX)
         .asBuilder);
   }
 
@@ -84,19 +83,18 @@ void _writeImportExports(
         (deferredModules != null && deferredModules.containsKey(import.uri))) {
       continue;
     }
-    imports.add(import.asBuilder);
+    directives.add(import.asBuilder);
   }
 
   // This is primed with model.depImports, and sets the prefix accordingly.
-  imports.addAll(scope.incrementingScope.toImports());
+  directives.addAll(scope.incrementingScope.toImports());
 
-  List<ExportBuilder> exports = [new ExportModel(uri: sourceFile).asBuilder];
-  exports.addAll(model.exports.map((model) => model.asBuilder));
+  directives.add(new ExportModel(uri: sourceFile).asBuilder);
+  directives.addAll(model.exports.map((model) => model.asBuilder));
 
-  var library = new LibraryBuilder.scope(scope: scope)
-    ..addDirectives(imports)
-    ..addDirectives(exports);
-  buffer.write(prettyToSource(library.buildAst()));
+  var library = new File((b) => b
+  ..directives.addAll(directives));
+  buffer.write(library.accept(new DartEmitter(scope)));
 }
 
 /// A custom [Scope] which simply delegates to other scopes based on where the

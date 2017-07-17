@@ -12,34 +12,11 @@ abstract class ClassMatcherBase {
 
   ClassMatcherBase(this._classDescriptors);
 
-  /// Adds a new [ClassDescriptor].
-  void add(ClassDescriptor classDescriptor) =>
-      _classDescriptors.add(classDescriptor);
-
-  /// Adds a number of [ClassDescriptor]s.
-  void addAll(Iterable<ClassDescriptor> classDescriptors) =>
-      _classDescriptors.addAll(classDescriptors);
-
   /// Returns the first [ClassDescriptor] that matches the given
   /// [Identifier] node which appears in `assetId`.
   ClassDescriptor firstMatch(Identifier className, AssetId assetId) =>
       _classDescriptors.firstWhere((a) => isMatch(className, a, assetId),
           orElse: () => null);
-
-  /// Checks whether an [Identifier] matches any [ClassDescriptor].
-  bool hasMatch(Identifier className, AssetId assetId) =>
-      _classDescriptors.any((a) => isMatch(className, a, assetId));
-
-  /// Checks whether an [Identifier] matches any [ClassDescriptor].
-  ImportDirective getMatchingImport(Identifier className, AssetId assetId) {
-    for (var d in _classDescriptors) {
-      var matchingImport = _getMatchingImport(className, d, assetId);
-      if (matchingImport != null) {
-        return matchingImport;
-      }
-    }
-    return null;
-  }
 
   /// Checks if `descriptor` extends or is any of the supplied `interfaces`.
   bool implements(ClassDescriptor descriptor, List<ClassDescriptor> interfaces,

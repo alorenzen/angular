@@ -1,5 +1,4 @@
 import 'package:code_builder/code_builder.dart';
-import 'package:code_builder/dart/core.dart';
 import 'package:quiver/strings.dart' as strings;
 import 'package:angular/src/transform/common/names.dart';
 
@@ -9,25 +8,22 @@ import 'parameter_model.dart';
 /// Reflective information about a symbol, including annotations, interfaces,
 /// and other metadata.
 class ReflectionInfoModel {
-  final ReferenceBuilder _type;
+  final Reference _type;
   final String ctorName;
   final bool isFunction;
 
   final Iterable<AnnotationModel> _annotations;
   final Iterable<ParameterModel> _parameters;
-  final Iterable<ReferenceBuilder> _interfaces;
 
   ReflectionInfoModel(
-      {ReferenceBuilder type,
+      {Reference type,
       this.ctorName,
       this.isFunction: false,
       Iterable<AnnotationModel> annotations: const [],
-      Iterable<ParameterModel> parameters: const [],
-      Iterable<ReferenceBuilder> interfaces: const []})
+      Iterable<ParameterModel> parameters: const []})
       : this._type = type,
         _annotations = annotations,
-        _parameters = parameters,
-        _interfaces = interfaces;
+        _parameters = parameters;
 
   List<ExpressionBuilder> get localMetadataEntry => [
         _type,
@@ -36,10 +32,10 @@ class ReflectionInfoModel {
       ];
 
   StatementBuilder get asRegistration {
-    var reflectionInfo = reference('ReflectionInfo', REFLECTOR_IMPORT)
+    var reflectionInfo = new Reference('ReflectionInfo', REFLECTOR_IMPORT)
         .newInstance(_reflectionInfoParams);
 
-    var reflector = reference(REFLECTOR_VAR_NAME, REFLECTOR_IMPORT);
+    var reflector = new Reference(REFLECTOR_VAR_NAME, REFLECTOR_IMPORT);
     if (isFunction) {
       return reflector.invoke('registerFunction', [_type, reflectionInfo]);
     } else if (_isSimpleType) {
@@ -52,8 +48,7 @@ class ReflectionInfoModel {
   bool get _isSimpleType =>
       !isFunction &&
       _annotations.isEmpty &&
-      _parameters.isEmpty &&
-      _interfaces.isEmpty;
+      _parameters.isEmpty;
 
   List<ExpressionBuilder> get _reflectionInfoParams {
     var reflectionInfoParams = <ExpressionBuilder>[
@@ -86,7 +81,7 @@ class ReflectionInfoModel {
 
   NewInstanceBuilder get _constructorExpression {
     var modelRef = _type;
-    var params = _parameters.map((param) => reference(param.paramName));
+    var params = _parameters.map((param) => new Reference(param.paramName));
     return strings.isNotEmpty(ctorName)
         ? modelRef.newInstance(params, constructor: ctorName)
         : modelRef.newInstance(params);
