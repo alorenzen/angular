@@ -1,6 +1,3 @@
-@TestOn('vm')
-import 'package:logging/logging.dart';
-import 'package:test/test.dart';
 import 'package:_tests/test_util.dart';
 import 'package:angular/src/compiler/ast_template_parser.dart';
 import 'package:angular/src/compiler/compile_metadata.dart';
@@ -13,6 +10,9 @@ import 'package:angular/src/compiler/schema/dom_element_schema_registry.dart';
 import 'package:angular/src/compiler/schema/element_schema_registry.dart'
     show ElementSchemaRegistry;
 import 'package:angular/src/compiler/template_ast.dart';
+@TestOn('vm')
+import 'package:logging/logging.dart';
+import 'package:test/test.dart';
 
 import 'schema_registry_mock.dart' show MockSchemaRegistry;
 import 'template_humanizer_util.dart';
@@ -342,7 +342,7 @@ void main() {
             [BoundEventAst, 'e', null, 'f'],
             [DirectiveAst, dirA]
           ]);
-        }, skip: 'Don\'t handle directives yet');
+        });
       });
 
       group('bindon', () {
@@ -411,7 +411,7 @@ void main() {
                 [DirectiveAst, dirB],
                 [DirectiveAst, dirC]
               ]);
-        }, skip: 'Order is not correct yet.');
+        });
 
         test('should locate directives in property bindings', () {
           var dirA = createCompileDirectiveMetadata(
@@ -464,7 +464,7 @@ void main() {
               null
             ]
           ]);
-        }, skip: 'Don\'t yet handle directive properties.');
+        });
 
         test('should parse directive host listeners', () {
           var dirA = createCompileDirectiveMetadata(
@@ -477,7 +477,7 @@ void main() {
             [DirectiveAst, dirA],
             [BoundEventAst, 'a', null, 'expr']
           ]);
-        }, skip: 'Don\'t yet handle directive properties.');
+        });
 
         test('should parse directive properties', () {
           var dirA = createCompileDirectiveMetadata(
@@ -490,7 +490,7 @@ void main() {
             [DirectiveAst, dirA],
             [BoundDirectivePropertyAst, 'aProp', 'expr']
           ]);
-        }, skip: 'Don\'t yet handle directive properties.');
+        });
 
         test('should parse renamed directive properties', () {
           var dirA = createCompileDirectiveMetadata(
@@ -503,7 +503,7 @@ void main() {
             [DirectiveAst, dirA],
             [BoundDirectivePropertyAst, 'b', 'expr']
           ]);
-        }, skip: 'Don\'t yet handle directive properties.');
+        });
 
         test('should parse literal directive properties', () {
           var dirA = createCompileDirectiveMetadata(
@@ -517,7 +517,7 @@ void main() {
             [DirectiveAst, dirA],
             [BoundDirectivePropertyAst, 'a', '"literal"']
           ]);
-        }, skip: 'Don\'t yet handle directive properties.');
+        });
 
         test('should favor explicit bound properties over literal properties',
             () {
@@ -535,7 +535,7 @@ void main() {
                 [DirectiveAst, dirA],
                 [BoundDirectivePropertyAst, 'a', '"literal2"']
               ]);
-        }, skip: 'Don\'t yet handle directive properties.');
+            }, skip: 'Don\'t remove duplicates yet.');
 
         test('should support optional directive properties', () {
           var dirA = createCompileDirectiveMetadata(
@@ -969,7 +969,7 @@ void main() {
             [ReferenceAst, 'a', identifierToken(dirA.type)],
             [DirectiveAst, dirA]
           ]);
-        }, skip: 'Don\'t handle directives yet.');
+        });
 
         test(
             'should report references with values that dont match a '
@@ -1014,18 +1014,24 @@ void main() {
             [ReferenceAst, 'a', identifierToken(dirA.type)],
             [DirectiveAst, dirA]
           ]);
-        }, skip: 'Don\'t handle directives yet.');
+        });
 
         test('should not locate directives in references', () {
           var dirA = createCompileDirectiveMetadata(
               selector: '[a]',
               type: new CompileTypeMetadata(
                   moduleUrl: someModuleUrl, name: 'DirA'));
-          expect(humanizeTplAst(parse('<div ref-a></div>', [dirA])), [
+
+          expect(humanizeTplAst(parse('<div #a></div>', [dirA])), [
             [ElementAst, 'div'],
             [ReferenceAst, 'a', null]
           ]);
-        }, skip: 'Don\'t handle directives yet.');
+
+          expect(humanizeTplAst(parse('<div ref-a></div>', [dirA])), [
+            [ElementAst, 'div'],
+            [AttrAst, 'ref-a', '']
+          ]);
+        });
       });
 
       group('explicit templates', () {
@@ -1053,7 +1059,7 @@ void main() {
             [EmbeddedTemplateAst],
             [ReferenceAst, 'a', identifierToken(Identifiers.TemplateRef)]
           ]);
-        }, skip: 'Don\'t yet support identifiers.');
+        });
 
         test('should support references via ref-...', () {
           expect(humanizeTplAst(parse('<template ref-a></template>', [])), [
@@ -1105,7 +1111,7 @@ void main() {
             [EmbeddedTemplateAst],
             [ElementAst, 'div']
           ]);
-        });
+        }, skip: 'Don\'t yet support non-start inline templates.');
 
         test('should parse bound properties', () {
           expect(
@@ -1116,7 +1122,7 @@ void main() {
                 [BoundDirectivePropertyAst, 'ngIf', 'test'],
                 [ElementAst, 'div']
               ]);
-        });
+        }, skip: 'Don\'t yet support non-start inline templates.');
 
         test('should parse variables via #... and report them as deprecated',
             () {
@@ -1133,7 +1139,7 @@ void main() {
                   '^^^^^^^^^^^^'
             ].join('\n')
           ]);
-        });
+            }, skip: 'Don\'t yet support error handling.');
 
         test('should parse variables via var ... and report them as deprecated',
             () {
@@ -1150,11 +1156,12 @@ void main() {
                   '^^^^^^^^^^^^^^^'
             ].join('\n')
           ]);
-        });
+            }, skip: 'Don\'t yet support error handling.');
 
         test('should parse variables via let ...', () {
           expect(humanizeTplAst(parse('<div *ngIf="let a=b"></div>', [])), [
             [EmbeddedTemplateAst],
+            [AttrAst, 'ngIf', ''],
             [VariableAst, 'a', 'b'],
             [ElementAst, 'div']
           ]);
@@ -1182,7 +1189,7 @@ void main() {
                   [AttrAst, 'b', ''],
                   [DirectiveAst, dirB]
                 ]);
-          });
+          }, skip: 'Don\'t yet support non-start inline templates.');
 
           test('should not locate directives in variables', () {
             var dirA = createCompileDirectiveMetadata(
@@ -1196,14 +1203,14 @@ void main() {
                   [VariableAst, 'a', 'b'],
                   [ElementAst, 'div']
                 ]);
-          });
+          }, skip: 'Don\'t yet support non-start inline templates.');
 
           test('should not locate directives in references', () {
             var dirA = createCompileDirectiveMetadata(
                 selector: '[a]',
                 type: new CompileTypeMetadata(
                     moduleUrl: someModuleUrl, name: 'DirA'));
-            expect(humanizeTplAst(parse('<div ref-a></div>', [dirA])), [
+            expect(humanizeTplAst(parse('<div #a></div>', [dirA])), [
               [ElementAst, 'div'],
               [ReferenceAst, 'a', null]
             ]);
@@ -1228,8 +1235,8 @@ void main() {
             [BoundDirectivePropertyAst, 'ngIf', 'null'],
             [ElementAst, 'div']
           ]);
-        });
-      }, skip: 'Don\'t support inline templates yet.');
+        }, skip: 'angular_ast throws NPE.');
+      });
     });
 
     group('content projection', () {
@@ -1348,7 +1355,7 @@ void main() {
                 ['ng-content', 0],
                 ['ng-content', null]
               ]);
-        });
+        }, skip: 'We don\'t support attributes on ng-content.');
       });
 
       test('should project into the first matching ng-content', () {
@@ -1427,7 +1434,7 @@ void main() {
               ['template', 1],
               ['b', null]
             ]);
-      });
+      }, skip: 'Don\'t propagate element name yet.');
 
       group('ngProjectAs', () {
         test('should override elements', () {
@@ -1452,7 +1459,7 @@ void main() {
                 ['div', null],
                 ['ng-content', 1]
               ]);
-        });
+        }, skip: 'We don\'t support attributes on ng-content.');
 
         test('should override <template>', () {
           expect(
@@ -1478,7 +1485,7 @@ void main() {
                 ['template', 1],
                 ['a', null]
               ]);
-        });
+        }, skip: 'Don\'t propagate element name yet.');
       });
 
       test('should support other directives before the component', () {
@@ -1492,7 +1499,7 @@ void main() {
               ['#text(hello)', 0]
             ]);
       });
-    }, skip: 'Don\'t support content projection yet.');
+    });
 
     group('error cases', () {
       test('should report when ng-content has content', () {
@@ -1859,7 +1866,7 @@ void main() {
           [DirectiveAst, dirA, '<div a>'],
           [DirectiveAst, comp, '<div a>']
         ]);
-      }, skip: 'Don\'t yet support directives.');
+      });
 
       test('should support directive in namespace', () {
         var tagSel = createCompileDirectiveMetadata(
@@ -1898,7 +1905,7 @@ void main() {
               [DirectiveAst, dirA, '<div [aProp]="foo">'],
               [BoundDirectivePropertyAst, 'aProp', 'foo', '[aProp]="foo"']
             ]);
-      }, skip: 'Don\'t yet support directives.');
+      });
     });
 
     group('pipes', () {

@@ -26,3 +26,5 @@ dependency_overrides:
     path: ../../angular_router
   angular_test:
     path: ../../angular_test
+  angular_ast: '0.4.0-alpha.0'
+  analyzer: '0.31.0-alpha.1'

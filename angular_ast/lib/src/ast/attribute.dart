@@ -108,7 +108,7 @@ class ParsedAttributeAst extends TemplateAst
     this.mustaches,
   ])
       : super.parsed(
-          nameToken,
+    nameToken,
           (valueToken == null ? nameToken : valueToken.rightQuote),
           sourceFile,
         );

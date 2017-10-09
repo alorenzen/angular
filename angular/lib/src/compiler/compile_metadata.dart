@@ -468,6 +468,9 @@ class CompileDirectiveMetadata implements CompileMetadataWithType {
   }
 
   @override
+  String toString() => 'CompileDirectiveMetadata{$selector}';
+
+  @override
   CompileIdentifierMetadata get identifier => type;
 
   bool get isComponent =>
