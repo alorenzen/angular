@@ -1,10 +1,12 @@
-import 'package:source_span/source_span.dart';
 import 'package:angular_ast/angular_ast.dart' as ast;
+import 'package:angular_ast/src/expression/micro.dart';
+import 'package:source_span/source_span.dart';
 
 import 'compile_metadata.dart';
 import 'expression_parser/ast.dart';
 import 'expression_parser/parser.dart';
 import 'identifiers.dart';
+import 'provider_parser.dart';
 import 'schema/element_schema_registry.dart';
 import 'selector.dart';
 import 'style_url_resolver.dart';
@@ -29,6 +31,15 @@ class AstTemplateParser implements TemplateParser {
       List<CompileDirectiveMetadata> directives,
       List<CompilePipeMetadata> pipes,
       String name) {
+    final parsedAst = _parseTemplate(template);
+    final desugaredAst = _inlineTemplates(parsedAst);
+    final filteredAst = _filterElements(desugaredAst);
+    final boundAsts = _bindDirectives(directives, compMeta, filteredAst);
+    _bindProviders(compMeta, parsedAst, boundAsts);
+    return boundAsts;
+  }
+
+  List<ast.TemplateAst> _parseTemplate(String template) {
     final parsedAst = ast.parse(template,
         // TODO(alorenzen): Use real sourceUrl.
         sourceUrl: '/test#inline',
@@ -37,8 +48,16 @@ class AstTemplateParser implements TemplateParser {
         parseExpressions: false);
     // TODO(alorenzen): Remove once all tests are passing.
     parsedAst.forEach(print);
-    final filter = new _ElementFilter();
-    final filteredAst = filter.visitAll(parsedAst);
+    return parsedAst;
+  }
+
+  List<ast.TemplateAst> _filterElements(List<ast.TemplateAst> parsedAst) =>
+      new _ElementFilter().visitAll(parsedAst);
+
+  List<ng.TemplateAst> _bindDirectives(
+      List<CompileDirectiveMetadata> directives,
+      CompileDirectiveMetadata compMeta,
+      List<ast.TemplateAst> filteredAst) {
     final visitor = new _Visitor();
     final context = new _ParseContext.forRoot(new _TemplateContext(
         parser: parser,
@@ -48,6 +67,126 @@ class AstTemplateParser implements TemplateParser {
     return filteredAst
         .map((templateAst) => templateAst.accept(visitor, context))
         .toList();
+  }
+
+  void _bindProviders(CompileDirectiveMetadata compMeta,
+      List<ast.TemplateAst> parsedAst, List<ng.TemplateAst> visitedAsts) {
+    var providerViewContext =
+    new ProviderViewContext(compMeta, parsedAst.first.sourceSpan);
+    final providerVisitor = new _ProviderVisitor(providerViewContext);
+    final ProviderElementContext providerContext = new ProviderElementContext(
+        providerViewContext,
+        null,
+        false,
+        [],
+        [],
+        [],
+        null);
+    for (var astNode in visitedAsts) {
+      astNode.visit(providerVisitor, providerContext);
+    }
+  }
+
+  List<ast.TemplateAst> _inlineTemplates(List<ast.TemplateAst> parsedAst) {
+    var values = parsedAst
+        .map((asNode) => asNode.accept(new _InlineTemplateDesugar()))
+        .toList();
+    values.forEach(print);
+    return values;
+  }
+}
+
+class _ProviderVisitor
+    implements ng.TemplateAstVisitor<Null, ProviderElementContext> {
+  final ProviderViewContext _rootContext;
+
+  _ProviderVisitor(this._rootContext);
+
+  @override
+  visitElement(ng.ElementAst ast, ProviderElementContext context) {
+    var elementContext = new ProviderElementContext(
+        _rootContext,
+        context,
+        false,
+        ast.directives,
+        ast.attrs,
+        ast.references,
+        ast.sourceSpan);
+    for (var child in ast.children) {
+      child.visit(this, elementContext);
+    }
+    elementContext.afterElement();
+    ast.providers.addAll(elementContext.transformProviders);
+  }
+
+  @override
+  visitEmbeddedTemplate(ng.EmbeddedTemplateAst ast,
+      ProviderElementContext context) {
+    var elementContext = new ProviderElementContext(
+        _rootContext,
+        context,
+        true,
+        ast.directives,
+        ast.attrs,
+        ast.references,
+        ast.sourceSpan);
+    for (var child in ast.children) {
+      child.visit(this, elementContext);
+    }
+    elementContext.afterElement();
+    ast.providers.addAll(elementContext.transformProviders);
+  }
+
+  @override
+  visitAttr(ng.AttrAst ast, ProviderElementContext context) {
+    // TODO: implement visitAttr
+  }
+
+  @override
+  visitBoundText(ng.BoundTextAst ast, ProviderElementContext context) {
+    // TODO: implement visitBoundText
+  }
+
+  @override
+  visitDirective(ng.DirectiveAst ast, ProviderElementContext context) {
+    // TODO: implement visitDirective
+  }
+
+  @override
+  visitDirectiveProperty(ng.BoundDirectivePropertyAst ast,
+      ProviderElementContext context) {
+    // TODO: implement visitDirectiveProperty
+  }
+
+  @override
+  visitElementProperty(ng.BoundElementPropertyAst ast,
+      ProviderElementContext context) {
+    // TODO: implement visitElementProperty
+  }
+
+  @override
+  visitEvent(ng.BoundEventAst ast, ProviderElementContext context) {
+    // TODO: implement visitEvent
+  }
+
+  @override
+  visitNgContent(ng.NgContentAst ast, ProviderElementContext context) {
+    // TODO: implement visitNgContent
+  }
+
+  @override
+  visitReference(ng.ReferenceAst ast, ProviderElementContext context) {
+    // TODO: implement visitReference
+  }
+
+  @override
+  visitText(ng.TextAst ast, ProviderElementContext context) {
+    // TODO: implement visitText
+  }
+
+  @override
+  visitVariable(ng.VariableAst ast, ProviderElementContext context) {
+    // TODO: implement visitVariable
   }
 }
 
@@ -82,6 +221,7 @@ class _Visitor
       [_ParseContext context]) {
     final embeddedContext =
         new _ParseContext.forTemplate(astNode, context.templateContext);
+    _visitAll(astNode.properties, embeddedContext);
     return new ng.EmbeddedTemplateAst(
         _visitAll(astNode.attributes, embeddedContext),
         _visitAll(astNode.events, embeddedContext),
@@ -120,7 +260,7 @@ class _Visitor
   ng.TemplateAst visitProperty(ast.PropertyAst astNode,
       [_ParseContext context]) {
     var value = context.templateContext.parser
-        .parseBinding(astNode.value, _location(astNode), []);
+        .parseBinding(astNode.value ?? 'null', _location(astNode), []);
     if (context.bindPropertyToDirective(astNode, value)) return null;
     return createElementPropertyAst(
         context.elementName,
@@ -469,5 +609,83 @@ class _ElementFilter extends ast.IdentityTemplateAstVisitor<bool> {
       if (attr.name == NG_NON_BINDABLE_ATTR) return true;
     }
     return false;
+  }
+}
+
+/// Visitor which extracts inline templates.
+class _InlineTemplateDesugar extends ast.IdentityTemplateAstVisitor<Null> {
+  @override
+  ast.TemplateAst visitElement(ast.ElementAst astNode,
+      [_ParseContext context]) {
+    var templateAttribute = _findTemplateAttribute(astNode);
+    if (templateAttribute == null) {
+      return astNode;
+    }
+
+    astNode.attributes.remove(templateAttribute);
+
+    if (templateAttribute.value == null) {
+      return new ast.EmbeddedTemplateAst.from(templateAttribute,
+          childNodes: [astNode]);
+    }
+
+    var name = _getName(templateAttribute.value);
+    var expression = _getExpression(templateAttribute.value);
+    final properties = <ast.PropertyAst>[];
+    final letBindings = <ast.LetBindingAst>[];
+    if (isMicroExpression(expression)) {
+      NgMicroAst micro;
+      var expressionOffset = (templateAttribute as ast.ParsedAttributeAst)
+          .valueToken
+          ?.innerValue
+          ?.offset;
+      try {
+        micro = parseMicroExpression(
+          name,
+          expression,
+          expressionOffset,
+          sourceUrl: astNode.sourceUrl,
+          origin: templateAttribute,
+        );
+        if (micro != null) {
+          properties.addAll(micro.properties);
+          letBindings.addAll(micro.letBindings);
+        }
+        return new ast.EmbeddedTemplateAst.from(templateAttribute,
+            properties: properties,
+            letBindings: letBindings,
+            attributes: name != null
+                ? [new ast.AttributeAst.from(templateAttribute, name)]
+                : [],
+            childNodes: [astNode]);
+      } catch (e) {
+        rethrow;
+        // exceptionHandler.handle(e);
+        // return astNode;
+      }
+    } else {
+      return new ast.EmbeddedTemplateAst.from(templateAttribute, properties: [
+        new ast.PropertyAst.from(templateAttribute, name, expression)
+      ], childNodes: [
+        astNode
+      ]);
+    }
+  }
+
+  ast.AttributeAst _findTemplateAttribute(ast.ElementAst astNode) =>
+      astNode.attributes
+          .firstWhere((attr) => attr.name == 'template', orElse: () => null);
+
+  String _getName(String value) {
+    var spaceIndex = value.indexOf(' ');
+    var name = value.substring(0, spaceIndex);
+    if (name == 'let') return null;
+    return name;
+  }
+
+  String _getExpression(String value) {
+    var spaceIndex = value.indexOf(' ');
+    if (value.substring(0, spaceIndex) == 'let') return value;
+    return value.substring(spaceIndex + 1);
   }
 }

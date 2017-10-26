@@ -16,7 +16,8 @@ final _isBind = new RegExp(r'\S+:');
 /// [parseMicroExpression] is needed to de-sugar the expression into its
 /// multiple intents.
 bool isMicroExpression(String expression) {
-  return expression.startsWith('let') || expression.startsWith(_isBind);
+  return expression != null &&
+      (expression.startsWith('let') || expression.startsWith(_isBind));
 }
 
 /// Returns a de-sugared micro AST from [expression].
