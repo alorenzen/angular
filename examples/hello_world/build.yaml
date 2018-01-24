@@ -1,0 +1,6 @@
+targets:
+  $default:
+    builders:
+      angular:
+        options:
+          use_new_template_parser: True
