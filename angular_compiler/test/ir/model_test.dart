@@ -10,19 +10,19 @@ void main() {
     Component component;
     setUp(() {
       component =
-          new Component('TestComponent', ChangeDetectionStrategy.checkAlways);
+          Component('TestComponent', ChangeDetectionStrategy.checkAlways);
     });
     test('simple ComponentView', () {
       expectOutput(
-        new ComponentView(component),
+        ComponentView(component),
         r'''
           class ViewTestComponent extends AppView<TestComponent> {
             ViewTestComponent(AppView<dynamic> parentView, int parentIndex) 
                 : super(ViewType.component, {}, parentView, parentIndex, ChangeDetectionStrategy.CheckAlways);
             
-            ComponentRef<TestComponent> build();
-            void detectChangesInternal();
-            void destroyInternal();
+            ComponentRef<TestComponent> build() {}
+            void detectChangesInternal() {}
+            void destroyInternal() {}
           }
           ''',
       );
@@ -30,28 +30,79 @@ void main() {
 
     test('simple HostView', () {
       expectOutput(
-        new HostView(new ComponentView(component), component),
+        HostView(ComponentView(component), component),
         r'''
           class _ViewTestComponentHost extends AppView<TestComponent> {
             _ViewTestComponentHost(AppView<dynamic> parentView, int parentIndex) 
                 : super(ViewType.host, {}, parentView, parentIndex, ChangeDetectionStrategy.CheckAlways);
+                
+            ViewTestComponent _foo_0;
           
-            ComponentRef<TestComponent> build();
-            void detectChangesInternal();
+            ComponentRef<TestComponent> build() {
+              _foo_0 = new ViewTestComponent(this, 0);
+            }
+            void detectChangesInternal() {
+              _foo_0.detectChanges();
+            }
             void destroyInternal() {
-              _compView?.destroy();
+              _foo_0?.destroy();
             }
       }
       ''',
+      );
+    });
+
+    test('ComponentView with TextElement', () {
+      expectOutput(
+        ComponentView(component, children: [TextNode('Hello, World')]),
+        r'''
+          class ViewTestComponent extends AppView<TestComponent> {
+            ViewTestComponent(AppView<dynamic> parentView, int parentIndex)
+                : super(ViewType.component, {}, parentView, parentIndex,
+                    ChangeDetectionStrategy.CheckAlways);
+                    
+            ComponentRef<TestComponent> build() {
+              _foo_0 = new Text('Hello, World');
+            }
+            void detectChangesInternal() {}
+            void destroyInternal() {}
+          }
+        ''',
+      );
+    });
+
+    test('ComponentView with Interpolation', () {
+      expectOutput(
+        ComponentView(component, children: [InterpolationNode(AST('foo'))]),
+        r'''
+          class ViewTestComponent extends AppView<TestComponent> {
+            ViewTestComponent(AppView<dynamic> parentView, int parentIndex)
+                : super(ViewType.component, {}, parentView, parentIndex,
+                    ChangeDetectionStrategy.CheckAlways);
+                    
+             Text _foo_0;
+                    
+            ComponentRef<TestComponent> build() {
+              _foo_0 = new Text('');
+            }
+            void detectChangesInternal() {
+              final currVal = _ctx.foo;
+              if (checkBinding(_foo_0, currVal)) {
+                _foo_0 = currVal;
+              }
+            }
+            void destroyInternal() {}
+          }
+        ''',
       );
     });
   });
 }
 
 expectOutput(View view, String expectedOutput) {
-  var outputBuilder = view.accept(new OutputIRVisitor());
-  var emitter = new DartEmitter();
-  var formatter = new DartFormatter();
+  var outputBuilder = view.accept(OutputIRVisitor(ReferenceService()));
+  var emitter = DartEmitter();
+  var formatter = DartFormatter();
   var actualOutput = formatter.format('${outputBuilder.accept(emitter)}');
   expect(actualOutput, formatter.format(expectedOutput));
 }
