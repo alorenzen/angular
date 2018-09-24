@@ -96,6 +96,74 @@ void main() {
         ''',
       );
     });
+
+    test('ComponentView with I18nTextNode', () {
+      expectOutput(
+          ComponentView(component, children: [
+            I18nTextNode(I18nMessage(
+                text: 'Hello, World', description: 'Greeting to the world'))
+          ]),
+          r'''
+            class ViewTestComponent extends AppView<TestComponent> {
+              ViewTestComponent(AppView<dynamic> parentView, int parentIndex)
+                  : super(ViewType.component, {}, parentView, parentIndex,
+                      ChangeDetectionStrategy.CheckAlways);
+              
+              static final String _foo_0 = 
+                  Intl.message('Hello, World', description: 'Greeting to the world');
+                    
+              ComponentRef<TestComponent> build() {
+                _foo_1 = new Text(_foo_0);
+              }
+              void detectChangesInternal() {}
+              void destroyInternal() {}
+            }
+      ''');
+    });
+
+    test('ComponentView with HtmlElement', () {
+      expectOutput(
+        ComponentView(component,
+            children: [HtmlElement('div'), HtmlElement('span')]),
+        r'''
+          class ViewTestComponent extends AppView<TestComponent> {
+            ViewTestComponent(AppView<dynamic> parentView, int parentIndex)
+                : super(ViewType.component, {}, parentView, parentIndex,
+                    ChangeDetectionStrategy.CheckAlways);
+                    
+            ComponentRef<TestComponent> build() {
+              final _foo_0 = createAndAppend(doc, 'div');
+              final _foo_1 = createAndAppend(doc, 'span');
+            }
+            void detectChangesInternal() {}
+            void destroyInternal() {}
+          }      
+          ''',
+      );
+    });
+
+    test('ComponentView with HtmlElement attributes', () {
+      expectOutput(
+        ComponentView(component, children: [
+          HtmlElement('div',
+              attributes: [Attribute('foo', LiteralAttributeValue('bar'))])
+        ]),
+        r'''
+          class ViewTestComponent extends AppView<TestComponent> {
+            ViewTestComponent(AppView<dynamic> parentView, int parentIndex)
+                : super(ViewType.component, {}, parentView, parentIndex,
+                    ChangeDetectionStrategy.CheckAlways);
+                    
+            ComponentRef<TestComponent> build() {
+              final _foo_0 = createAndAppend(doc, 'div');
+              _foo_0.setAttribute('foo', 'bar');
+            }
+            void detectChangesInternal() {}
+            void destroyInternal() {}
+          }      
+          ''',
+      );
+    });
   });
 }
 

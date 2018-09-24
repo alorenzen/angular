@@ -1,3 +1,5 @@
+import 'package:meta/meta.dart';
+
 abstract class Node {
   R accept<R, C>(IRVisitor<R, C> visitor, [C context]);
 }
@@ -89,8 +91,6 @@ class EmbeddedView implements View {
   List<Node> get children => [];
 }
 
-abstract class Element implements Node {}
-
 class TextNode implements Node {
   final String value;
 
@@ -121,8 +121,91 @@ class InterpolationNode implements Node {
       visitor.visitInterpolationElement(this, context);
 }
 
-// TODO(alorenzen): Copy implementation from angular.
-class I18nMessage {}
+/// An internationalized message.
+class I18nMessage {
+  /// The message text to be translated for different locales.
+  final String text;
+
+  /// A description of a message's use.
+  ///
+  /// This provides translators more context to aid with translation.
+  final String description;
+
+  /// Arguments that appear as interpolations in [text].
+  ///
+  /// These are currently only used to support HTML nested within this message.
+  final Map<String, String> args;
+
+  /// The meaning of a message, used to disambiguate equivalent messages.
+  ///
+  /// It's possible that two messages are textually equivalent in the source
+  /// language, but have different meanings. In this case it's important that
+  /// they are handled as separate translations.
+  ///
+  /// This value is optional, and may be null if omitted.
+  final String meaning;
+
+  /// Whether this message should be skipped for internationalization.
+  ///
+  /// When true, this message is still be validated and rendered, but it isn't
+  /// extracted for translation. This is useful for placeholder messages during
+  /// development that haven't yet been finalized.
+  final bool skip;
+
+  I18nMessage({
+    @required this.text,
+    @required this.description,
+    this.args = const {},
+    this.meaning,
+    this.skip = false,
+  });
+}
+
+abstract class Element implements Node {}
+
+class HtmlElement implements Element {
+  final String tagName;
+  final List<Attribute> attributes;
+
+  final List<Node> children;
+
+  HtmlElement(this.tagName,
+      {this.attributes = const [], this.children = const []});
+
+  @override
+  R accept<R, C>(IRVisitor<R, C> visitor, [C context]) =>
+      visitor.visitHtmlElement(this, context);
+}
+
+class Attribute implements Node {
+  final String name;
+  final AttributeValue value;
+
+  Attribute(this.name, this.value);
+
+  @override
+  R accept<R, C>(IRVisitor<R, C> visitor, [C context]) {
+    return visitor.visitAttribute(this, context);
+  }
+}
+
+abstract class AttributeValue<T> {
+  T get value;
+}
+
+class LiteralAttributeValue implements AttributeValue<String> {
+  @override
+  final String value;
+
+  LiteralAttributeValue(this.value);
+}
+
+class I18nAttributeValue implements AttributeValue<I18nMessage> {
+  @override
+  final I18nMessage value;
+
+  I18nAttributeValue(this.value);
+}
 
 // TODO(alorenzen): Determine how to represent expressions in new IR.
 class AST {
@@ -139,4 +222,6 @@ abstract class IRVisitor<R, C> {
   R visitTextElement(TextNode textNode, [C context]);
   R visitI18nTextNode(I18nTextNode i18nTextNode, [C context]);
   R visitInterpolationElement(InterpolationNode interpolationNode, [C context]);
+  R visitHtmlElement(HtmlElement htmlElement, [C context]);
+  R visitAttribute(Attribute attribute, [C context]);
 }

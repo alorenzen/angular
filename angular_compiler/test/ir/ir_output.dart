@@ -124,8 +124,7 @@ class OutputIRVisitor extends DefaultIRVisitor<Spec, Null> {
     }
   }
 
-  Block _visitChildren(
-      List<Node> children, IRVisitor<Code, Null> visitor) {
+  Block _visitChildren<C>(List<Node> children, IRVisitor<Code, C> visitor) {
     final builder = BlockBuilder();
     for (var child in children) {
       var expression = child.accept(visitor);
@@ -161,37 +160,85 @@ class FieldVisitor extends DefaultIRVisitor<Field, Null> {
   }
 
   @override
-  Field visitInterpolationElement(InterpolationNode interpolation, [Null context]) {
+  Field visitInterpolationElement(InterpolationNode interpolation,
+      [Null context]) {
     return Field((b) => b
-        ..name = _references.lookup(interpolation).symbol
-        ..type = refer('Text')
-    );
+      ..name = _references.lookup(interpolation).symbol
+      ..type = refer('Text'));
   }
+
+  @override
+  Field visitI18nTextNode(I18nTextNode i18nTextNode, [Null context]) {
+    return Field((b) => b
+      ..name = _references.lookup(i18nTextNode).symbol
+      ..type = refer('String')
+      ..modifier = FieldModifier.final$
+      ..static = true
+      ..assignment = _i18nMessage(i18nTextNode.value));
+  }
+
+  Code _i18nMessage(I18nMessage i18nMessage) =>
+      refer('Intl').property('message').call([literalString(i18nMessage.text)],
+          {'description': literalString(i18nMessage.description)}).code;
 }
 
-class BuildVisitor extends DefaultIRVisitor<Code, Null> {
+class BuildVisitor extends DefaultIRVisitor<Code, Node> {
   final ReferenceService _references;
 
   BuildVisitor(this._references);
 
   @override
-  Code visitComponentView(ComponentView componentView, [Null context]) {
-    return _references.lookup(componentView).assign(
-        refer(componentView.name).newInstance([refer('this'), literal(0)])).statement;
+  Code visitComponentView(ComponentView componentView, [Node _]) {
+    return _references
+        .lookup(componentView)
+        .assign(
+            refer(componentView.name).newInstance([refer('this'), literal(0)]))
+        .statement;
   }
 
   @override
-  Code visitTextElement(TextNode textElement, [Null context]) {
+  Code visitTextElement(TextNode textElement, [Node _]) {
     return _references
         .lookup(textElement)
-        .assign(refer('Text').newInstance([literalString(textElement.value)])).statement;
+        .assign(refer('Text').newInstance([literalString(textElement.value)]))
+        .statement;
   }
 
   @override
-  Code visitInterpolationElement(InterpolationNode interpolation, [Null context]) {
+  Code visitInterpolationElement(InterpolationNode interpolation, [Node _]) {
     return _references
         .lookup(interpolation)
-        .assign(refer('Text').newInstance([literalString('')])).statement;
+        .assign(refer('Text').newInstance([literalString('')]))
+        .statement;
+  }
+
+  @override
+  Code visitI18nTextNode(I18nTextNode i18nTextNode, [Node _]) {
+    return _references
+        .lookup(new TextNode(null))
+        .assign(refer('Text').newInstance([_references.lookup(i18nTextNode)]))
+        .statement;
+  }
+
+  @override
+  Code visitHtmlElement(HtmlElement htmlElement, [Node _]) {
+    return Block.of([_createHtmlElement(htmlElement)]
+      ..addAll(visitAll(htmlElement.attributes, htmlElement)));
+  }
+
+  Code _createHtmlElement(HtmlElement htmlElement) {
+    return refer('createAndAppend')
+        .call([refer('doc'), literalString(htmlElement.tagName)])
+        .assignFinal(_references.lookup(htmlElement).symbol)
+        .statement;
+  }
+
+  @override
+  Code visitAttribute(Attribute attribute, [Node parent]) {
+    return _references.lookup(parent).property('setAttribute').call([
+      literalString(attribute.name),
+      literalString(attribute.value.value.toString())
+    ]).statement;
   }
 }
 
@@ -202,16 +249,24 @@ class DetectChangesVisitor extends DefaultIRVisitor<Code, Null> {
 
   @override
   Code visitComponentView(ComponentView componentView, [Null context]) {
-    return _references.lookup(componentView).property('detectChanges').call([]).statement;
+    return _references
+        .lookup(componentView)
+        .property('detectChanges')
+        .call([]).statement;
   }
-  
+
   @override
-  Code visitInterpolationElement(InterpolationNode interpolation, [Null context]) {
+  Code visitInterpolationElement(InterpolationNode interpolation,
+      [Null context]) {
     var currVal = refer('currVal');
     return Block.of([
-      refer('_ctx').property(interpolation.expression.expression).assignFinal(currVal.symbol).statement,
+      refer('_ctx')
+          .property(interpolation.expression.expression)
+          .assignFinal(currVal.symbol)
+          .statement,
       const Code('if ('),
-      lazyCode(() => refer('checkBinding').call([_references.lookup(interpolation), currVal]).code),
+      lazyCode(() => refer('checkBinding')
+          .call([_references.lookup(interpolation), currVal]).code),
       const Code(') {'),
       _references.lookup(interpolation).assign(currVal).statement,
       const Code('}'),
